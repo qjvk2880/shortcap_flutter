@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:shortcap/enum/main_category.dart';
 import 'service/network_service.dart';
 
@@ -32,7 +35,8 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMixin {
+class _MyHomePageState extends State<MyHomePage>
+    with SingleTickerProviderStateMixin {
   late TabController tabController = TabController(
     length: 11,
     vsync: this,
@@ -46,31 +50,21 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          title: _title(),
-          bottom: _tabBar()
-      ),
-      body: ListView(
-        padding: const EdgeInsets.only(top: 25.0),
-        children: [
-          FractionallySizedBox(
-            widthFactor: 0.9,
-            child: Container(
-              height: 200.0,
-              color: Colors.blueGrey,
-              child: Row(
-                children: [
-                ],
-              )
+        appBar: AppBar(
+            title: _title(),
+            bottom: _tabBar()
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                shrinkWrap: true,
+                padding: const EdgeInsets.only(top: 25.0),
+                children: listView
+              ),
             ),
-          ),
-          Container(
-            child: Text(
-                "hi"
-            ),
-          )
-        ],
-      )
+          ],
+        )
     );
   }
 
@@ -95,17 +89,92 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
       tabAlignment: TabAlignment.start,
       isScrollable: true,
       controller: tabController,
-      tabs: MainCategory.values.map((mainCategory) => Container(
-        width: 30.0,
-        child: Tab(text: mainCategory.krName,),
-      )).toList(),
+      tabs: MainCategory.values.map((mainCategory) =>
+          Container(
+            width: 30.0,
+            child: Tab(text: mainCategory.krName,),
+          )).toList(),
       onTap: (index) {
-          NetworkService.getSubCategoryList(index)
-              .then((subCategoryList) {
-
-               }
-          );
-      },
-    );
-  }
+        NetworkService.getSubCategoryList(index)
+            .then((subCategoryList) {
+              print(subCategoryList[0].subCategory);
+              setState(() {
+                listView = List<Widget>.generate(subCategoryList.length, (idx) {
+                  return FractionallySizedBox(
+                    widthFactor: 0.9,
+                    // heightFactor: 0.3,
+                    child: Container(
+                        height: 160.0,
+                        // width: double.infinity,
+                        color: Colors.transparent,
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 120.0,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(Radius.circular(5)),
+                                  color: Colors.grey
+                              ),
+                            ),
+                            Container(
+                              child: SizedBox(
+                                width: 20.0,
+                                height: 160.0,
+                              ),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.only(top: 10.0),
+                                  child: Text(
+                                      subCategoryList[idx].subCategory,
+                                    style: TextStyle(
+                                      fontSize: 25.0,
+                                      color: Color(0xff3c66fc),
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  child: SizedBox(
+                                    height: 10.0,
+                                  ),
+                                ),
+                                Container(
+                                  width: 70.0,
+                                  height: 28.0,
+                                  child: OutlinedButton(
+                                    onPressed: () {},
+                                    child: FittedBox(
+                                      fit: BoxFit.contain,
+                                      child: Text(
+                                        '더보기',
+                                        style: TextStyle(
+                                            fontSize: 15.0,
+                                            color: Color(0xff6a9dff),
+                                            fontWeight: FontWeight.bold
+                                        ),
+                                      ),
+                                    ),
+                                    style: OutlinedButton.styleFrom(
+                                      backgroundColor: Color(0xffe7f1f6),
+                                      side: BorderSide(
+                                        color: Colors.transparent
+                                      )
+                                    ),
+                                  ),
+                                )
+                              ],
+                            )
+                          ],
+                        )
+                    ),
+                  );
+                });
+              });
+              },
+            );
+      });
+    }
 }
